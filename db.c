@@ -102,6 +102,34 @@ static struct dbitem make_item(const char *str)
 	return ret;
 }
 
+static char * remove_spaces(char * res)
+{
+    char * str = res;
+    char * from, *to;
+    
+    int k = 0;
+    if(!str)
+        return NULL;
+    
+    for(;*(str + 1); ++str)
+        if(*str == ' ' && *(str + 1) == ' ')
+            ++k;
+    if(*str == ' ')
+        ++k;
+    
+    if(!(str = malloc((strlen(res) * sizeof(char)) - k + 1)))
+        return NULL;
+    
+    for((to = str, from = res);*(from + 1);++from) {
+        if(*from == ' ' && *(from + 1) == ' ')
+            continue;
+        *to++ = *from;
+    }
+    *from != ' '?*to++ = *from:1==1;
+    *to = '\0';
+    return str;
+}
+
 /* Put version here. A good thing to do is to make it depend on git versioning.
  * This could be done, for example, via Makefile
  * https://engineering.taboola.com/calculating-git-version/
@@ -229,11 +257,12 @@ int main(int argc, char *argv[]) {
 	}
 
 	if (args.query) {
-		char *qval = strdup(args.query);
+		char *qval = remove_spaces(args.query);
 		if (qval == NULL)
 			err_exit(0, EM_ALLOC);	/* This one will never be muted by --quiet */
 		char *qname = strsep(&qval, " ");
 		dbg("qname=%s, qval=%s", qname, qval);
+
 		/* Now our string is: [qname]\0[qval]\0, i.e. 2in1 distinguished by ptr   */
 		const int n_allq = sizeof(query_name) / sizeof (*query_name);
 		int qtype;
